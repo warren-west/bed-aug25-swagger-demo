@@ -18,16 +18,14 @@ const populateRouter = require('./routes/populateDb')
 app.use(bodyParser.json())
 app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
+// Apply CORS policies
+app.use(cors()) // Configure CORS (Cross-Origin Resource Sharing)
+
 // link routes to URLs
 app.use('/', indexRouter)
 app.use('/tattoos', tattoosRouter)
 app.use('/styles', stylesRouter)
 app.use('/populate', populateRouter)
-
-// Apply CORS policies
-app.use(cors({
-    origin: ["http://localhost:5501", "http://127.0.0.1:5501"],
-})) // Configure CORS (Cross-Origin Resource Sharing)
 
 // import the db object from ./models
 const db = require('./models')

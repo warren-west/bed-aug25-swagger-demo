@@ -6,6 +6,17 @@ const doc = {
         description: "An API that serves Tattoo, Style, and Color data."
     },
     host: "localhost:3000",
+    definitions: {
+        Tattoo: {
+            $description: "Black panther",
+        },
+        Style: {
+            styleName: "Japanese"
+        },
+        Color: {
+            colorName: "Red"
+        }
+    }
 }
 
 const outputFile = './swagger-output.json'

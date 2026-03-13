@@ -82,6 +82,33 @@
             "description": "OK"
           }
         }
+      },
+      "post": {
+        "tags": [
+          "Styles"
+        ],
+        "summary": "Add a new Style record into the database.",
+        "description": "Provide the details for a new Style record to be added to the database.",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/Style"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     },
     "/styles/{id}": {
@@ -104,6 +131,76 @@
             "description": "OK"
           }
         }
+      },
+      "put": {
+        "tags": [
+          "Styles"
+        ],
+        "summary": "Update a Style record in the database.",
+        "description": "Provide the new details for the Style record to updated.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "styleName": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Styles"
+        ],
+        "summary": "Delete a Style record from the database.",
+        "description": "Provide the ID for the Style record to deleted.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
       }
     },
     "/populate/": {
@@ -120,6 +217,38 @@
           "500": {
             "description": "Internal Server Error"
           }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "Tattoo": {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string",
+          "example": "Black panther"
+        }
+      },
+      "required": [
+        "description"
+      ]
+    },
+    "Style": {
+      "type": "object",
+      "properties": {
+        "styleName": {
+          "type": "string",
+          "example": "Japanese"
+        }
+      }
+    },
+    "Color": {
+      "type": "object",
+      "properties": {
+        "colorName": {
+          "type": "string",
+          "example": "Red"
         }
       }
     }

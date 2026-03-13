@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "node --watch ./swagger.js"
+    "start": "node --watch ./swagger.js",
+    "rundev": "node --watch ./swagger.js"
   },
   "dependencies": {
     "cors": "^2.8.6",
