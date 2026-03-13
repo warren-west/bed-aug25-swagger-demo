@@ -8,6 +8,16 @@ router.get('/', async (req, res) => {
 
     // .json() function sets some properties in the response header
     // one of them is the "Content-Type": "application/json"
+
+    // check the req object for a token:
+    console.log(req.headers.authorization.split(' ')[1])
+    const token = req.headers.authorization.split(' ')[1]
+
+    // validate the token, or
+    // decode the token
+    // read the data from the token,
+    // etc.
+
     const allTattoos = await db.Tattoo.findAll()
     
     res.status(200).json({ data: allTattoos, message: "Success", error: null })

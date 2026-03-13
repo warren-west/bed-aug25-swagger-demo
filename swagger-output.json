@@ -32,6 +32,13 @@
         ],
         "summary": "Retrieve a list of tattoos from the database.",
         "description": "Description of /tattoos",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
