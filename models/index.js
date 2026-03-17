@@ -17,11 +17,21 @@ const db = {}
 db.Color = require('./colors')(sequelize)
 db.Tattoo = require('./tattoos')(sequelize)
 db.Style = require('./styles')(sequelize)
+db.Role = require('./roles')(sequelize)
+db.User = require('./users')(sequelize)
 
 // add sequelize to the db
 db.sequelize = sequelize
 
-// establish associations
+// ASSOCIATIONS
+// one role has many users
+db.Role.hasMany(db.User)
+db.User.belongsTo(db.Role)
+
+// one user has many tattoos
+db.User.hasMany(db.Tattoo)
+db.Tattoo.belongsTo(db.User)
+
 // one style has many tattoos
 db.Style.hasMany(db.Tattoo)
 // one tattoo has one style

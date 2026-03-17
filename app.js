@@ -13,6 +13,7 @@ const indexRouter = require('./routes/index')
 const tattoosRouter = require('./routes/tattoos')
 const stylesRouter = require('./routes/styles')
 const populateRouter = require('./routes/populateDb')
+const authRouter = require('./routes/auth')
 
 // swagger middleware
 app.use(bodyParser.json())
@@ -26,6 +27,7 @@ app.use('/', indexRouter)
 app.use('/tattoos', tattoosRouter)
 app.use('/styles', stylesRouter)
 app.use('/populate', populateRouter)
+app.use('/login', authRouter)
 
 // import the db object from ./models
 const db = require('./models')

@@ -7,9 +7,9 @@ router.post('/', async (req, res) => {
     // #swagger.summary = 'Populates the database with dummy data.'
     // Tattoo data
     const tattoos = [
-        { description: "Panther", StyleId: 1 },
-        { description: "Patterns", StyleId: 2 },
-        { description: "Circles", StyleId: 3 },
+        { description: "Panther", StyleId: 1, UserId: 1 },
+        { description: "Patterns", StyleId: 2, UserId: 1 },
+        { description: "Circles", StyleId: 3, UserId: 1 },
     ]
 
     // Style data
@@ -27,6 +27,18 @@ router.post('/', async (req, res) => {
         { colorName: "Blue" },
         { colorName: "White" },
         { colorName: "Blue" },
+    ]
+
+    // Roles
+    const roles = [
+        { roleName: "CUSTOMER" },   // id=1
+        { roleName: "ARTIST" },     // id=2
+    ]
+
+    // Users
+    const users = [
+        { username: "warren-west", email: "warren@west.com", password: "1234", RoleId: 1 },
+        { username: "kat-von", email: "kat@blueink.com", password: "admin", RoleId: 2 },
     ]
 
     // Linking table data
@@ -47,6 +59,8 @@ router.post('/', async (req, res) => {
     // use sequelize's .bulkCreate() function to seed the DB with dummy data
     // Important: Don't forget the await keyword here:
     try {
+        await db.Role.bulkCreate(roles)
+        await db.User.bulkCreate(users)
         await db.Color.bulkCreate(colors)
         await db.Style.bulkCreate(styles)
         await db.Tattoo.bulkCreate(tattoos)
