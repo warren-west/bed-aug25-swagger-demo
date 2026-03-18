@@ -33,7 +33,7 @@ app.use('/login', authRouter)
 const db = require('./models')
 
 //  sync the database with the sequelize object
-db.sequelize.sync({ alter: false })
+db.sequelize.sync({alter: true})
 
 // get the port number
 const port = process.env.PORT || 3000

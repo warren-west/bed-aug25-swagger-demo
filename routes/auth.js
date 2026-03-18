@@ -27,7 +27,7 @@ router.post('/', async (req, res) => {
             res.status(404).json({ data: null, message: "Error", error: "User not found." })
             return
         }
-        
+
         // we have a matching user to the username
         // check if password is correct
         if (result.password !== password) {
@@ -57,8 +57,61 @@ router.post('/', async (req, res) => {
 
 // POST /login/signup
 router.post('/signup', async (req, res) => {
-    // implement sign up logic
-    res.end()
+    const { username, password, confirmPassword, email } = req.body
+
+    // basic validation
+    if (!username || !password || !confirmPassword || !email) {
+        res.status(400).json({ data: null, message: "Error", error: "Username, password, and email required." })
+        return
+    }
+
+    // if the password doesn't match the confirmPassword, throw an error
+    if (password !== confirmPassword) {
+        res.status(400).json({ data: null, message: "Error", error: "Passwords need to match." })
+        return
+    }
+
+    try {
+        // create a new user record in the DB
+        // this could throw validation errors if the username or email is not unique, or if the email is invalid, e.g. "warren.com"
+        const result = await db.User.create({
+            username,
+            password,
+            email,
+            RoleId: 1, // default a new user to the Role of "CUSTOMER", not "ARTIST"
+        })
+
+        // create the payload, and remove the "password" property
+        const payload = { ...JSON.parse(JSON.stringify(result)) }
+        console.log(payload)
+        delete payload.password
+        console.log(payload) // same, but without "password" property
+
+        // create the token with the payload object and secret
+        const newToken = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" })
+
+        // successful login
+        res.status(201).json({ data: newToken, message: "Success", error: null })
+        return
+
+    } catch (error) {
+        // using the error object to determine the type of error.
+        // dealing with username or email not unique
+        if (error.errors[0].type === 'unique violation') {
+            const problem = error.errors[0].value
+            res.status(400).json({ data: null, message: "Error", error: `'${problem}' is already taken` })
+            return
+        }
+        // deal with invalid email address
+        if (error.errors[0].type === "Validation error") {
+            const problem = error.errors[0].value
+            res.status(400).json({ data: null, message: "Error", error: `'${problem}' is an invalid email address` })
+            return
+        }
+
+        res.status(500).json({ data: null, message: "Error", error: "Server error" })
+        return
+    }
 })
 
 module.exports = router
