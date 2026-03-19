@@ -2,6 +2,7 @@ require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const app = express()
+const jsend = require('jsend')
 
 // swagger dependencies
 const swaggerUi = require('swagger-ui-express')
@@ -21,6 +22,7 @@ app.use('/doc', swaggerUi.serve, swaggerUi.setup(swaggerFile))
 
 // Apply CORS policies
 app.use(cors()) // Configure CORS (Cross-Origin Resource Sharing)
+app.use(jsend.middleware) // jsend can be used in all of our routes
 
 // link routes to URLs
 app.use('/', indexRouter)
@@ -33,7 +35,7 @@ app.use('/login', authRouter)
 const db = require('./models')
 
 //  sync the database with the sequelize object
-db.sequelize.sync({alter: true})
+db.sequelize.sync({alter: false})
 
 // get the port number
 const port = process.env.PORT || 3000

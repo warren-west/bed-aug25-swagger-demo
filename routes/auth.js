@@ -1,24 +1,34 @@
 require('dotenv').config()
 const router = require('express').Router()
+const { Op } = require('sequelize') // import the Op operator
 const db = require("../models")
 const jwt = require('jsonwebtoken')
 
 // POST /login
 router.post('/', async (req, res) => {
+    // #swagger.tags = ["Authentication"]
+    // #swagger.summary = "Log in using username and password credentials."
     console.log("/LOGIN PINGED 🚨")
-    // get the username and password from the req.body
-    const { username, password } = req.body
+    // get the username, email and password from the req.body
+    const { email, username, password } = req.body
 
-    // validate username and password,
-    // if either is missing, send back error 400
-    if (!username || !password) {
+    // validate password,
+    // we NEED a password to exist
+    if (!password) {
         res.status(400).json({ data: null, message: "Error", error: "Username and password are required." })
         return
     }
 
+    // we need EITHER a username OR an email to log the user in
+    if (!username && !email) {
+        res.status(400).json({ data: null, message: "Error", error: "Username or email is required." })
+        return
+    }
+
     try {
-        // we have a username and password combination to check
-        const result = await db.User.findOne({ where: { username } })
+        // we have a (username or email) and password combination to check
+        // modify the WHERE clause, to find user by email or by username
+        let result = await db.User.findOne({ where: { [Op.or]: [ { username }, { email } ]}})
 
         console.log(JSON.parse(JSON.stringify(result)))
 
@@ -57,6 +67,8 @@ router.post('/', async (req, res) => {
 
 // POST /login/signup
 router.post('/signup', async (req, res) => {
+    // #swagger.tags = ["Authentication"]
+    // #swagger.summary = "Sign up and create a new User record in the DB."
     const { username, password, confirmPassword, email } = req.body
 
     // basic validation

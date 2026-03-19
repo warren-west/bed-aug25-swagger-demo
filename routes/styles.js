@@ -61,7 +61,7 @@ router.post('/', isLoggedIn, isArtist, async (req, res) => {
 
 // update a style, by ID
 // check that the user is an ARTIST to update a style
-router.put('/:id', isArtist, async (req, res) => {
+router.put('/:id', isLoggedIn, isArtist, async (req, res) => {
     // #swagger.tags = ['Styles']
     // #swagger.summary = 'Update a Style record in the database.'
     // #swagger.description = 'Provide the new details for the Style record to updated.'

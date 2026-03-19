@@ -32,19 +32,47 @@
         ],
         "summary": "Retrieve a list of tattoos from the database.",
         "description": "Description of /tattoos",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tattoos"
+        ],
+        "summary": "Create a new tattoo record in the DB.",
+        "description": "Create a new tattoo record in the DB.",
         "parameters": [
           {
-            "name": "authorization",
-            "in": "header",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "UserId": {
+                  "example": "any"
+                },
+                "StyleId": {
+                  "example": "any"
+                },
+                "description": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
+          "201": {
+            "description": "Created"
           },
-          "401": {
-            "description": "Unauthorized"
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -65,9 +93,6 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "400": {
             "description": "Bad Request"
           },
@@ -264,6 +289,10 @@
     },
     "/login/": {
       "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Log in using username and password credentials.",
         "description": "",
         "parameters": [
           {
@@ -272,6 +301,9 @@
             "schema": {
               "type": "object",
               "properties": {
+                "email": {
+                  "example": "any"
+                },
                 "username": {
                   "example": "any"
                 },
@@ -303,6 +335,10 @@
     },
     "/login/signup": {
       "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Sign up and create a new User record in the DB.",
         "description": "",
         "parameters": [
           {
