@@ -6,9 +6,17 @@ const db = require('../models')
 router.get('/', async (req, res) => {
     // #swagger.tags = ['Styles']
     // #swagger.summary = 'Retrieve a list of styles from the database.'
-    const results = await db.Style.findAll()
-
-    res.json({ data: results, message: "Success", error: null })
+    try {
+        const results = await db.Style.findAll()
+        
+        // using JSEND:
+        res.jsend.success(results)
+        return
+    } catch (error) {
+        // catch error 500
+        res.jsend.error("Internal server error.")
+        return
+    }
 })
 
 // get style by ID
@@ -18,9 +26,18 @@ router.get('/:id', isLoggedIn, async (req, res) => {
     // #swagger.summary = 'Retrieve a single style object by ID.'
     const { id } = req.params
 
-    const style = await db.Style.findByPk(id)
-
-    res.json({ data: style, message: "Success", error: null })
+    try {
+        const style = await db.Style.findByPk(id)
+    
+        // use JSEND:
+        res.jsend.success(style)
+        return
+        
+    } catch (error) {
+        // catch server error
+        res.jsend.error("Internal server error.")
+        return
+    }
 })
 
 // check that the user is logged in, and has admin rights to create a new style
@@ -41,19 +58,22 @@ router.post('/', isLoggedIn, isArtist, async (req, res) => {
 
     // styleName is empty, undefined, or null
     if (!styleName) {
-        res.status(400).json({ data: null, message: "Error", error: "Invalid input." })
+        // res.status(400).json({ data: null, message: "Error", error:  })
+        res.status(400).jsend.error("Invalid input.")
         return
     }
-
+    
     try {
         // the newly created object is returned to us
         const result = await db.Style.create({ styleName })
-
-        res.status(201).json({ data: result, message: "Success", error: null })
+        
+        // res.status(201).json({ data: result, message: "Success", error: null })
+        res.status(201).jsend.success(result)
         return
-
+        
     } catch (error) {
-        res.status(500).json({ data: null, message: "Error", error: "Internal server error." })
+        res.status(500).jsend.error("Internal server error.")
+        // res.status(500).json({ data: null, message: "Error", error: "Internal server error." })
         return
     }
 
@@ -83,12 +103,14 @@ router.put('/:id', isLoggedIn, isArtist, async (req, res) => {
 
     // validate inputs:
     if (isNaN(id)) {
-        res.status(400).json({ data: null, message: "Error", error: "Invalid ID provided" })
+        // res.status(400).json({ data: null, message: "Error", error: "Invalid ID provided" })
+        res.status(400).jsend.error("Invalid ID provided")
         return
     }
-
+    
     if (!styleName) {
-        res.status(400).json({ data: null, message: "Error", error: "Invalid styleName provided" })
+        // res.status(400).json({ data: null, message: "Error", error: "Invalid styleName provided" })
+        res.status(400).jsend.error("Invalid styleName provided")
         return
     }
 
@@ -100,11 +122,13 @@ router.put('/:id', isLoggedIn, isArtist, async (req, res) => {
             return
         }
 
-        res.status(204).json() //.json({ data: "Success", message: "Success", error: null })
+        // res.status(204).json() //.json({ data: "Success", message: "Success", error: null })
+        res.status(204).jsend.success()
         return
-
+        
     } catch (error) {
-        res.status(500).json({ data: null, message: "Error", error: "Internal server error." })
+        // res.status(500).json({ data: null, message: "Error", error: "Internal server error." })
+        res.status(500).jsend.error("Internal server error.")
         return
     }
 })
@@ -124,7 +148,8 @@ router.delete('/:id', isLoggedIn, isArtist, async (req, res) => {
 
     // validate
     if (isNaN(id)) {
-        res.status(400).json({ data: null, message: "Error", error: "Invalid ID input." })
+        // res.status(400).json({ data: null, message: "Error", error: "Invalid ID input." })
+        res.status(400).jsend.error("Invalid ID input.")
         return
     }
 
@@ -133,15 +158,18 @@ router.delete('/:id', isLoggedIn, isArtist, async (req, res) => {
         console.log(result) // 0 rows affected
 
         if (!result) {
-            res.status(404).json({ data: null, message: "Error", error: "404: Not found." })
+            // res.status(404).json({ data: null, message: "Error", error: "404: Not found." })
+            res.status(404).jsend.error("404: Not found.")
             return
         }
 
-        res.status(204).json() // no point in trying to attach a response
+        // res.status(204).json() // no point in trying to attach a response
+        res.status(204).success()
         return
 
     } catch (error) {
-        res.status(500).json({ data: null, message: "Error", error: "Internal server error" })
+        // res.status(500).json({ data: null, message: "Error", error: "Internal server error" })
+        res.status(500).jsend.error("Internal server error.")
         return
     }
 })

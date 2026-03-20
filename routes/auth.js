@@ -10,7 +10,7 @@ router.post('/', async (req, res) => {
     // #swagger.summary = "Log in using username and password credentials."
     console.log("/LOGIN PINGED 🚨")
     // get the username, email and password from the req.body
-    const { email, username, password } = req.body
+    const { email='', username='', password } = req.body
 
     // validate password,
     // we NEED a password to exist

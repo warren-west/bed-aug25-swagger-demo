@@ -2,3 +2,4 @@
 task
 assets
 node_modules
+test.env

@@ -25,5 +25,5 @@ const endpointsFiles = ['./app.js']
 // swaggerAutogen(outputFile, endpointsFiles, doc) // the function that generates the .json file
 
 swaggerAutogen(outputFile, endpointsFiles, doc).then(() => {
-    require('./app.js') // starts the server
+    require('./listener.js') // starts the server
 })
