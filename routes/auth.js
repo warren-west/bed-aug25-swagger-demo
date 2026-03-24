@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken')
 router.post('/', async (req, res) => {
     // #swagger.tags = ["Authentication"]
     // #swagger.summary = "Log in using username and password credentials."
+    // #swagger.description = "Test CUSTOMER user credentials: username = warren-west, password: 1234. Test ARTIST credentials: username: kat-von, password: admin"
+
     console.log("/LOGIN PINGED 🚨")
     // get the username, email and password from the req.body
     const { email='', username='', password } = req.body

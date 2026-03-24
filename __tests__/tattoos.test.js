@@ -27,16 +27,66 @@ describe("Auth Tests", () => {
         // assign the value of the valid token to the token variable to use later in other tests
         token = body.data
     })
-
-    test.skip("Login works for valid email, valid password, and undefined username.", async () => {
-        // todo
+    
+    test("Login works for valid email, valid password, and undefined username.", async () => {
+        const expectedCode = 200
+        const expectedStatusMessage = "Success" // the jsend message property
+    
+        // Act
+        const { body, statusCode } = await request(app).post('/login').send({ email: "warren@west.com", username: undefined, password: "1234" })
+    
+        // Assert
+        expect(statusCode).toBe(expectedCode)
+    
+        expect(body).toHaveProperty("data")
+        expect(body).toHaveProperty("message")
+        expect(body).toHaveProperty("error")
+    
+        expect(body.message).toBe(expectedStatusMessage)
+        expect(body.error).toBeNull()
     })
     
-    test.skip("Login fails for invalid login credentials.", async () => {
-        // todo
+    test("Login fails for correct username, incorrect password.", async () => {
+        // Arrange
+        const expectedCode = 401
+        const expectedErrorMessage = "Username / password incorrect."
+        const expectedStatus = "Error"
+
+        // Act
+        const { body, statusCode } = await request(app).post('/login').send({ username: "warren-west", password: "abcdef" })
+
+        // Assert
+        expect(statusCode).toBe(expectedCode)
+        expect(body.error).toBe(expectedErrorMessage)
+        expect(body.message).toBe(expectedStatus)
+
+        expect(body).toHaveProperty("data")
+        expect(body).toHaveProperty("error")
+        expect(body).toHaveProperty("message")
+
+        expect(body.data).toBeNull()
     })
 
-    // other auth tests
+    test("Logging in without any username, password, or email. Should return 400: bad request.", async () => {
+        // Arrange
+        const expectedCode = 400
+        const expectedStatusMessage = "Username and password are required."
+        const expectedStatus = "Error"
+
+        // Act
+        const { body, statusCode } = await request(app).post('/login').send({ username: null, password: null, email: null })
+
+        // Assert
+        expect(statusCode).toBe(expectedCode)
+        expect(body.message).toBe(expectedStatus)
+        expect(body.error).toBe(expectedStatusMessage)
+
+        expect(body).toHaveProperty("data")
+        expect(body).toHaveProperty("message")
+        expect(body).toHaveProperty("error")
+
+        expect(body.data).toBeNull()
+    })
 })
 
 // describe is a container for multiple related tests

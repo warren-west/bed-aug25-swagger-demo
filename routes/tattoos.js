@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const db = require('../models')
-const jwt = require('jsonwebtoken')
+const { isLoggedIn, isArtist } = require('../middlewares/authMiddleware.js')
 
 router.get('/', async (req, res) => {
     // #swagger.tags = ['Tattoos']
@@ -19,10 +19,10 @@ router.get('/', async (req, res) => {
 })
 
 // return a single object
-router.get('/:id', async (req, res) => {
+router.get('/:id', isLoggedIn, async (req, res) => {
     // #swagger.tags = ['Tattoos']
     // #swagger.summary = 'Retrieve a single tattoo object by ID.'
-    // #swagger.description = 'Description of /tattoos/:id'
+    // #swagger.description = 'Fetch a single record of a tattoo from the database. The user should be logged in, but not required to have the role of "ARTIST". The Authorization header should have the format: "Bearer <TOKEN>."'
     
     const { id } = req.params
     // validate id:
