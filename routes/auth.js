@@ -3,6 +3,7 @@ const router = require('express').Router()
 const { Op } = require('sequelize') // import the Op operator
 const db = require("../models")
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
 
 // POST /login
 router.post('/', async (req, res) => {
@@ -40,12 +41,14 @@ router.post('/', async (req, res) => {
             return
         }
 
+        const encryptionResult = await bcrypt.compare(password, result.password)
+        
         // we have a matching user to the username
         // check if password is correct
-        if (result.password !== password) {
+        if (!encryptionResult) {
             res.status(401).json({ data: null, message: "Error", error: "Username / password incorrect." })
             return
-        }
+        }        
 
         // we have a user with a correct password
         // sign (generate) a token for the user
@@ -86,11 +89,15 @@ router.post('/signup', async (req, res) => {
     }
 
     try {
+        // encrypt the password
+        const hashedPassword = await bcrypt.hash(password, 10)
+        console.log(hashedPassword)
+
         // create a new user record in the DB
         // this could throw validation errors if the username or email is not unique, or if the email is invalid, e.g. "warren.com"
         const result = await db.User.create({
             username,
-            password,
+            password: hashedPassword, // encrypted password added to DB
             email,
             RoleId: 1, // default a new user to the Role of "CUSTOMER", not "ARTIST"
         })

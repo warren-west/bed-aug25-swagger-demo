@@ -34,6 +34,6 @@ app.use('/login', authRouter)
 const db = require('./models')
 
 //  sync the database with the sequelize object
-db.sequelize.sync({alter: false})
+db.sequelize.sync({ force: false })
 
 module.exports = app

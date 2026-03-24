@@ -16,7 +16,7 @@ module.exports = (sequelize) => {
                 isEmail: true,
             }
         },
-        password: DataTypes.STRING(150),
+        password: DataTypes.STRING(300),
     },
     {
         timestamps: false

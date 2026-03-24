@@ -1,5 +1,6 @@
 const router = require('express').Router()
 const db = require('../models')
+const bcrypt = require('bcrypt')
 
 // hard-code the starting data
 router.post('/', async (req, res) => {
@@ -37,9 +38,13 @@ router.post('/', async (req, res) => {
 
     // Users
     const users = [
-        { username: "warren-west", email: "warren@west.com", password: "1234", RoleId: 1 },
-        { username: "kat-von", email: "kat@blueink.com", password: "admin", RoleId: 2 },
+        { username: "warren-west", email: "warren@west.com", password: undefined, RoleId: 1 },
+        { username: "kat-von", email: "kat@blueink.com", password: undefined, RoleId: 2 },
     ]
+
+    // encrypt users' passwords
+    users[0].password = await bcrypt.hash("1234", 10)
+    users[1].password = await bcrypt.hash("admin", 10)
 
     // Linking table data
     const timeNow = new Date()
