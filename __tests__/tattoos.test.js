@@ -152,35 +152,79 @@ describe("Style Tests", () => {
 
 describe("Tattoo Tests", () => {
     // Should refactor this old test to use supertest request(app).get('/tattoos')...
-    test.skip("We get a list of tattoos back from the /tattoos endpoint.", async () => {
+    test("We get a list of tattoos back from the /tattoos endpoint.", async () => {
     
         // Arrange
         const expectedStatusCode = 200
+        const expectedStatus = "success"
     
         // Act
-        const resp = await fetch('http://localhost:3000/tattoos')
-        const actual = await resp.json()
-    
-        console.log(actual)
+        const { body, statusCode } = await request(app).get('/tattoos')
     
         // Assert
         // check the status code
-        expect(resp.status).toBe(expectedStatusCode) // status should be 200
-    
+        expect(statusCode).toBe(expectedStatusCode) // status should be 200
+        expect(body.status).toBe(expectedStatus)
+
         // check the properties on the root object
-        expect(actual).toHaveProperty("status")
-        expect(actual).toHaveProperty("data")
+        expect(body).toHaveProperty("status")
+        expect(body).toHaveProperty("data")
     
         // check that the status equals "success"
-        expect(actual.status).toBe("success")
+        expect(body.status).toBe("success")
         // check that the data array is greater than 0
-        expect(actual.data.length).toBeGreaterThan(0)
+        expect(body.data.length).toBeGreaterThan(0)
         // check the properties on the data object
-        expect(actual.data[0]).toHaveProperty("id")
-        expect(actual.data[0]).toHaveProperty("description")
-        expect(actual.data[0]).toHaveProperty("UserId")
-        expect(actual.data[0]).toHaveProperty("StyleId")
+        expect(body.data[0]).toHaveProperty("id")
+        expect(body.data[0]).toHaveProperty("description")
+        expect(body.data[0]).toHaveProperty("UserId")
+        expect(body.data[0]).toHaveProperty("StyleId")
     })
 
-    // other tattoo tests
+    test("We expect a successful single tattoo to be returned, provided a valid ID.", async () => {
+        // Arrange
+        const expectedStatusCode = 200
+        const expectedStatus = "success"
+        const id = 2
+
+        // Act
+        const { body, statusCode } = await request(app).get('/tattoos/' + id).set("authorization", `Bearer ${token}`)
+
+        // Assert
+        expect(statusCode).toBe(expectedStatusCode)
+        expect(body.status).toBe(expectedStatus)
+
+        expect(body).toHaveProperty("status")
+        expect(body).toHaveProperty("data")
+
+        expect(body.data).toHaveProperty("id")
+        expect(body.data).toHaveProperty("description")
+        expect(body.data).toHaveProperty("StyleId")
+        expect(body.data).toHaveProperty("UserId")
+    })
+
+    test("Successfully create a new Tattoo record in the database.", async () => {
+        // Arrange
+        const expectedCode = 201
+        const newTattooData = { description: "Zebra", UserId: 1, StyleId: 1, Colors: [1] }
+        const expectedStatus = "success"
+
+        // Act
+        const { body, statusCode } = await request(app).post('/tattoos').send(newTattooData)
+
+        // Assert
+        expect(statusCode).toBe(expectedCode)
+        expect(body.status).toBe(expectedStatus)
+
+        // response body should have properties:
+        expect(body).toHaveProperty("data")
+        expect(body).toHaveProperty("status")
+
+        // response body.data should have properties:
+        expect(body.data).toHaveProperty("id")
+        expect(body.data).toHaveProperty("description")
+        expect(body.data).toHaveProperty("UserId")
+        expect(body.data).toHaveProperty("StyleId")
+        expect(body.data).toHaveProperty("Colors")
+    })
 })

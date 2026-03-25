@@ -59,6 +59,9 @@
                 },
                 "description": {
                   "example": "any"
+                },
+                "Colors": {
+                  "example": "any"
                 }
               }
             }

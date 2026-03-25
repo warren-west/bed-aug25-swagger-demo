@@ -1,5 +1,7 @@
 const router = require('express').Router()
 const db = require('../models')
+const TattooService = require('../services/TattooService.js')
+const tattooService = new TattooService(db)
 const { isLoggedIn, isArtist } = require('../middlewares/authMiddleware.js')
 
 router.get('/', async (req, res) => {
@@ -10,7 +12,7 @@ router.get('/', async (req, res) => {
     // .json() function sets some properties in the response header
     // one of them is the "Content-Type": "application/json"
 
-    const allTattoos = await db.Tattoo.findAll({ include: [db.Style, db.Color] })
+    const allTattoos = await tattooService.getAllTattoos()
 
     // res.status(200).json({ data: allTattoos, message: "Success", error: null })
     // replace old way of returning data with JSEND:
@@ -33,7 +35,7 @@ router.get('/:id', isLoggedIn, async (req, res) => {
     }
     
     try {
-        const tattoo = await db.Tattoo.findByPk(id, { include: [ db.Style, db.Color ] })
+        const tattoo = await tattooService.getTattooById(id)
         
         if (!tattoo || tattoo.length === 0) {
             // the tattoo was not found
@@ -57,7 +59,12 @@ router.post('/', async (req, res) => {
     // #swagger.tags = ['Tattoos']
     // #swagger.summary = 'Create a new tattoo record in the DB.'
     // #swagger.description = 'Create a new tattoo record in the DB.'
-    const { UserId, StyleId, description } = req.body
+    const { UserId, StyleId, description, Colors } = req.body
+
+    // there's no functionality here catering for a possible associated Colors
+    console.log("UserId", UserId)
+    console.log("StyleId", StyleId)
+    console.log("description", description)
     
     // validation
     if (!UserId || !StyleId || !description) {
@@ -65,9 +72,15 @@ router.post('/', async (req, res) => {
         return
     }
 
+    // If we receive Colors for the new Tattoo, then Colors should be an array
+    if (Colors && !Array.isArray(Colors)) {
+        res.status(400).jsend.error("400. Bad request")
+        return
+    }
+
     try {
         // this will throw an error if the UserId or StyleId doesn't exist in the Db
-        const result = await db.Tattoo.create({ description, UserId, StyleId })
+        const result = await tattooService.createTattoo(description, UserId, StyleId, Colors)
 
         // success
         res.status(201).jsend.success(result)
