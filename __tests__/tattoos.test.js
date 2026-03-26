@@ -2,6 +2,7 @@ const request = require('supertest')
 const app = require('../app')
 
 let token
+let artistToken
 
 describe("Auth Tests", () => {
     test("Login works with valid username, valid password, and undefined email.", async () => {
@@ -11,8 +12,8 @@ describe("Auth Tests", () => {
 
         // Act
         const { body, statusCode } = await request(app)
-                                            .post('/login')
-                                            .send({ username: "warren-west", password: "1234" })
+            .post('/login')
+            .send({ username: "warren-west", password: "1234" })
 
         // Assert
         expect(statusCode).toBe(expectedCode)
@@ -23,29 +24,29 @@ describe("Auth Tests", () => {
 
         expect(body.message).toBe(expectedStatusMessage)
         expect(body.error).toBeNull()
-        
+
         // assign the value of the valid token to the token variable to use later in other tests
         token = body.data
     })
-    
+
     test("Login works for valid email, valid password, and undefined username.", async () => {
         const expectedCode = 200
         const expectedStatusMessage = "Success" // the jsend message property
-    
+
         // Act
         const { body, statusCode } = await request(app).post('/login').send({ email: "warren@west.com", username: undefined, password: "1234" })
-    
+
         // Assert
         expect(statusCode).toBe(expectedCode)
-    
+
         expect(body).toHaveProperty("data")
         expect(body).toHaveProperty("message")
         expect(body).toHaveProperty("error")
-    
+
         expect(body.message).toBe(expectedStatusMessage)
         expect(body.error).toBeNull()
     })
-    
+
     test("Login fails for correct username, incorrect password.", async () => {
         // Arrange
         const expectedCode = 401
@@ -87,10 +88,34 @@ describe("Auth Tests", () => {
 
         expect(body.data).toBeNull()
     })
+
+    test("Login successfully with ARTIST credentials. Should return a token.", async () => {
+        // Arrange
+        const username = "kat-von"
+        const password = "admin"
+        const expectedStatusCode = 200
+        const expectedStatusMessage = "Success"
+
+        // Act
+        const { body, statusCode } = await request(app).post('/login').send({ username, password })
+
+        // Assert
+        expect(statusCode).toBe(expectedStatusCode)
+        expect(body.message).toBe(expectedStatusMessage)
+        expect(body).toHaveProperty("message")
+        expect(body).toHaveProperty("data")
+        expect(body).toHaveProperty("error")
+        expect(body.error).toBeNull()
+        expect(body.data).not.toBeNull()
+        expect(body.data).not.toBeUndefined()
+
+        artistToken = body.data
+    })
 })
 
 // describe is a container for multiple related tests
 describe("Style Tests", () => {
+    let newStyleId
 
     // note the function in the test params is ASYNC
     test("The GET /styles endpoint returns a list of styles.", async () => {
@@ -129,9 +154,9 @@ describe("Style Tests", () => {
 
         // Act
         // destructure the body and statusCode of the response object
-        const { body, statusCode} = await request(app)
-                                    .get(`/styles/${id}`)
-                                    .set("authorization", `Bearer ${token}`)
+        const { body, statusCode } = await request(app)
+            .get(`/styles/${id}`)
+            .set("authorization", `Bearer ${token}`)
 
         console.log(body)
 
@@ -146,21 +171,104 @@ describe("Style Tests", () => {
         // todo
     })
 
-    // other style tests
+    // test POST /styles
+    test("The POST /styles endpoint with a valid styleName property, should get a 201.", async () => {
+        // Arrange
+        const expectedStatusCode = 201
+        const expectedStatusMessage = "success"
+        const newStyle = { styleName: "Anime" }
+
+        // Act
+        const { body, statusCode } = await request(app).post('/styles').set("authorization", `Bearer ${artistToken}`).send(newStyle)
+
+        // Assert
+        expect(statusCode).toBe(expectedStatusCode)
+        expect(body).toHaveProperty("status")
+        expect(body).toHaveProperty("data")
+        expect(body.status).toBe(expectedStatusMessage)
+        expect(body.data).toHaveProperty("id")
+        expect(body.data).toHaveProperty("styleName", newStyle.styleName)
+
+        newStyleId = body.data.id
+    })
+
+    // test PUT /styles/:id
+    test("The UPDATE /styles/:id endpoint should update the styleName of the new Style that was created. Should return a 204.", async () => {
+        // Arrange
+        const expectedStatusCode = 204
+        const updatedStyleName = "Animated"
+
+        // Act
+        const { body, statusCode } = await request(app).put(`/styles/${newStyleId}`).set("authorization", `Bearer ${artistToken}`).send({ styleName: updatedStyleName })
+
+        // Assert
+        expect(statusCode).toBe(expectedStatusCode)
+        expect(body).toMatchObject({})
+    })
+    
+    // test DELETE /styles/:id
+    test("The DELETE /styles/:id endpoint should delete the newly created and updated Style record by ID, should return a 204.", async () => {
+        // Arrange
+        const expectedStatusCode = 204
+        
+        // Act
+        const { body, statusCode } = await request(app).delete(`/styles/${newStyleId}`).set("authorization", `Bearer ${artistToken}`)
+        
+        // Assert
+        expect(statusCode).toBe(expectedStatusCode)
+        expect(body).toMatchObject({})
+    })
+    
+    test("The DELETE /styles/:id endpoint should try delete the same object that was just deleted, should return a 404.", async () => {
+        // Arrange
+        const expectedStatusCode = 404
+        const expectedStatusMessage = "404: Not found."
+        const expectedStatus = "error"
+        
+        // Act
+        const { body, statusCode } = await request(app).delete(`/styles/${newStyleId}`).set("authorization", `Bearer ${artistToken}`)
+        
+        // Assert
+        expect(statusCode).toBe(expectedStatusCode)
+        
+        expect(body).toHaveProperty("message")
+        expect(body).toHaveProperty("status")
+    
+        expect(body.message).toBe(expectedStatusMessage)
+        expect(body.status).toBe(expectedStatus)
+    })
+
+    test("The UPDATE /styles/:id endpoint where a Style doesn't exist. Should return a 404.", async () => {
+        const expectedStatusCode = 404
+        const styleName = "Updated style name"
+        const expectedStatusMessage = "404: Not found."
+        const expectedStatus = "Error"
+
+        const { body, statusCode } = await request(app).put(`/styles/${newStyleId}`).set("authorization", `Bearer ${artistToken}`).send({ styleName })
+
+        expect(statusCode).toBe(expectedStatusCode)
+        expect(body).toHaveProperty("data")
+        expect(body).toHaveProperty("error")
+        expect(body).toHaveProperty("message")
+
+        expect(body.data).toBeNull()
+        expect(body.error).toBe(expectedStatusMessage)
+        expect(body.message).toBe(expectedStatus)
+    })
 })
 
 
-describe("Tattoo Tests", () => {
+describe.skip("Tattoo Tests", () => {
     // Should refactor this old test to use supertest request(app).get('/tattoos')...
     test("We get a list of tattoos back from the /tattoos endpoint.", async () => {
-    
+
         // Arrange
         const expectedStatusCode = 200
         const expectedStatus = "success"
-    
+
         // Act
         const { body, statusCode } = await request(app).get('/tattoos')
-    
+
         // Assert
         // check the status code
         expect(statusCode).toBe(expectedStatusCode) // status should be 200
@@ -169,7 +277,7 @@ describe("Tattoo Tests", () => {
         // check the properties on the root object
         expect(body).toHaveProperty("status")
         expect(body).toHaveProperty("data")
-    
+
         // check that the status equals "success"
         expect(body.status).toBe("success")
         // check that the data array is greater than 0

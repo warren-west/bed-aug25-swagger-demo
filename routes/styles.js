@@ -1,13 +1,15 @@
 const router = require('express').Router()
 const { isArtist, isLoggedIn } = require('../middlewares/authMiddleware')
 const db = require('../models')
+const StyleService = require('../services/StyleService')
+const styleService = new StyleService(db)
 
 // get all styles
 router.get('/', async (req, res) => {
     // #swagger.tags = ['Styles']
     // #swagger.summary = 'Retrieve a list of styles from the database.'
     try {
-        const results = await db.Style.findAll()
+        const results = await styleService.getAllStyles()
         
         // using JSEND:
         res.jsend.success(results)
@@ -27,7 +29,7 @@ router.get('/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
 
     try {
-        const style = await db.Style.findByPk(id)
+        const style = await styleService.getStyleById(id)
     
         // use JSEND:
         res.jsend.success(style)
@@ -65,7 +67,7 @@ router.post('/', isLoggedIn, isArtist, async (req, res) => {
     
     try {
         // the newly created object is returned to us
-        const result = await db.Style.create({ styleName })
+        const result = await styleService.createStyle(styleName)
         
         // res.status(201).json({ data: result, message: "Success", error: null })
         res.status(201).jsend.success(result)
@@ -115,19 +117,47 @@ router.put('/:id', isLoggedIn, isArtist, async (req, res) => {
     }
 
     try {
-        const result = await db.Style.update({ styleName }, { where: { id } })
+        const result = await styleService.updateStyle(id, styleName)
 
-        if (!result) {
+        // number of affected rows is 0 (404 error)
+        if (result[0] === 0) {
             res.status(404).json({ data: null, message: "Error", error: "404: Not found." })
             return
         }
 
-        // res.status(204).json() //.json({ data: "Success", message: "Success", error: null })
-        res.status(204).jsend.success()
+        res.status(204).jsend.success(result)
         return
         
     } catch (error) {
-        // res.status(500).json({ data: null, message: "Error", error: "Internal server error." })
+        console.log(error)
+        res.status(500).jsend.error("Internal server error.")
+        return
+    }
+})
+
+router.put('/', isLoggedIn, isArtist, async (req, res) => {
+    // styleName = the value we want to replace
+    // newStyleName = what we want to replace it with
+    const { styleName, newStyleName } = req.body
+
+    try {
+        const result = await styleService.massUpdateByStyleName(styleName, newStyleName)
+
+        console.log(result)
+
+        // No rows were affected
+        if (result[0] === 0) {
+            res.status(404).jsend.error("404: Not found.")
+            return
+        }
+
+        // At least 1 row was affected
+        res.status(204).jsend.success(result)
+        return
+
+    } catch (error) {
+        // Something went wrong
+        console.log(error)
         res.status(500).jsend.error("Internal server error.")
         return
     }
@@ -154,7 +184,7 @@ router.delete('/:id', isLoggedIn, isArtist, async (req, res) => {
     }
 
     try {
-        const result = await db.Style.destroy({ where: { id } })
+        const result = await styleService.deleteStyle(id)
         console.log(result) // 0 rows affected
 
         if (!result) {
@@ -164,10 +194,11 @@ router.delete('/:id', isLoggedIn, isArtist, async (req, res) => {
         }
 
         // res.status(204).json() // no point in trying to attach a response
-        res.status(204).success()
+        res.status(204).jsend.success(result)
         return
 
     } catch (error) {
+        console.log(error)
         // res.status(500).json({ data: null, message: "Error", error: "Internal server error" })
         res.status(500).jsend.error("Internal server error.")
         return
